@@ -1,0 +1,5 @@
+fairseq
+langid
+nltk
+pyphen
+unidecode
