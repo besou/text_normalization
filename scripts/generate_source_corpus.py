@@ -10,7 +10,7 @@ from unidecode import unidecode
 class Source_Data_Preparer():
     def __init__(self, config):
         self.replacements = config['replacements']
-        self.n_to_n = config['n_to_n']
+        self.n_to_m = config['n_to_m']
         self.vowels = config['vowels']
         self.consonants = config['consonants']
 
@@ -24,19 +24,19 @@ class Source_Data_Preparer():
 
 
     def modify(self, grapheme, grapheme_type):
-        if random.random() > 0.8 and self.replacements[grapheme_type][grapheme] != []:
+        if random.random() > 0.84 and self.replacements[grapheme_type][grapheme] != []:
             grapheme = self._select(self.replacements[grapheme_type][grapheme])
         return grapheme
 
 
     def process(self, text):
-        if self.n_to_n:
+        if self.n_to_m:
             text = text.replace('_', '')
-            text = text.replace('- ', ' ')
+            text = re.sub(rf'(?=[{self.consonants}{self.vowels}])- ', ' ', text)
         tokens = text.split(' ')
         source = []
-        for token in tokens:
-            token = f' {token} '
+        for token_orig in tokens:
+            token = f' {token_orig} '
             mod = re.sub(rf'(?<=[ ·])({self._get_keys("onset")})(?=[{self.vowels}])', lambda x: self.modify(x.group(1), 'onset'), token)
             if mod != '':
                 token = mod
@@ -49,6 +49,9 @@ class Source_Data_Preparer():
             mod = re.sub(rf'(?<=[ ·])([{self.consonants}]?)({self._get_keys("syllable")})(?=[ ·])', lambda x: x.group(1) + self.modify(x.group(2), 'syllable'), token)
             if mod != '':
                 token = mod
+            mod = re.sub(rf'(?<=[{self.consonants}{self.vowels}·])({self._get_keys("final")})(?= )', lambda x: self.modify(x.group(1), 'final'), token)
+            if mod != '':
+                token = mod
             mod = re.sub(rf'(?<=[{self.vowels}])({self._get_keys("ambisyllabic")})(?=[{self.vowels}])', lambda x: self.modify(x.group(1), 'ambisyllabic'), token)
             if mod != '':
                 token = mod
@@ -57,8 +60,11 @@ class Source_Data_Preparer():
             if random.random() > 0.5:
                 token = re.sub(r'(.)\1(.)\2', r'\1\2\2', token)
             token = token.lower().strip()
-            source.append(token)
-        return ' '.join(source)
+            if token != '':
+                source.append(token)
+            else:
+                source.append(token_orig)
+        return re.sub(r' +', ' ', ' '.join(source))
 
 
 def main():

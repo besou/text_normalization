@@ -3,7 +3,7 @@
 - remove bad samples from training data
 - restrict character range
 - tokenize to words
-- optional: prepare n-to-n mapping
+- optional: prepare n-to-m mapping
 """
 
 from random import random, randint
@@ -21,7 +21,7 @@ class Target_Data_Cleaner():
     def __init__(self, config):
         self.charset = config['charset_target']
         self.lang = config['lang']
-        self.n_to_n = config['n_to_n']
+        self.n_to_m = config['n_to_m']
         self.n_copies = config['num_copies']
         self.identifier = LanguageIdentifier.from_modelstring(model, norm_probs=True)
         self.identifier.set_languages(config['filter_langs'].append(self.lang))
@@ -29,8 +29,9 @@ class Target_Data_Cleaner():
 
 
     def remove_chars(self, text):
-        text = text.replace('_', '')
+        text = text.replace(r'[_\+\*$#=~\[\]\{\}]', '')
         text = re.sub(r'(- ?)+', '-', text)
+        text = re.sub('—', '-', text)
         return text
 
 
@@ -53,7 +54,7 @@ class Target_Data_Cleaner():
             return string.find(substring, self._find_nth(string, substring, n-1) + 1)
 
 
-    def prepare_n_to_n_mapping(self, text):
+    def prepare_n_to_m_mapping(self, text):
         if random() > 0.99 and text.count(' ') > 2:
             n_spaces = text.count(' ')
             n = randint(1, n_spaces-1)
@@ -71,15 +72,15 @@ class Target_Data_Cleaner():
         return text
 
 
-    def preprocess(self, text, n_to_n=True):
+    def preprocess(self, text, n_to_m=True):
         text = self.remove_chars(text)
         text = self.restrict_charset(text)
         text = self.word_tokenize(text)
         text = re.sub(r' +', ' ', text)
         texts = []
         for i in range(self.n_copies):
-            if self.n_to_n:
-                texts.append(self.prepare_n_to_n_mapping(text))
+            if self.n_to_m:
+                texts.append(self.prepare_n_to_m_mapping(text))
             else:
                 texts.append(text)
         return texts
@@ -97,6 +98,8 @@ class Target_Data_Cleaner():
         if '^' in text:
             return True
         if 'http' in text:
+            return True
+        if '@' in text:
             return True
         lid = self.identifier.classify(text)
         if lid[0] == 1 and lid[0] != self.lang:
