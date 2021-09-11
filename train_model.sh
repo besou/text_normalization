@@ -49,7 +49,7 @@ echo "Prepare parallel corpus ..."
 python3 scripts/clean_target_corpus.py ${input} ${outdir}/corpus.${tgt} ${config}
 python3 scripts/generate_source_corpus.py ${outdir}/corpus.${tgt} ${outdir}/corpus.${src} ${config}
 
-# cinduct ngram test
+# conduct ngram test
 if ! [[ -z ${ngram_test} ]]; then
     echo "Conduct ngram test ..."
     python3 scripts/ngram_test.py ${outdir}/corpus.${src} ${ngram_test} ngram_report.txt
