@@ -32,6 +32,8 @@ class Target_Data_Cleaner():
         text = text.replace(r'[_\+\*$#=~\[\]\{\}]', '')
         text = re.sub(r'(- ?)+', '-', text)
         text = re.sub('—', '-', text)
+        text = re.sub(rf' [«‹»›](?=[{self.charset}])', '„', text)
+        text = re.sub(rf'(?<=[{self.charset}])[«‹»›] ', '“', text)
         return text
 
 
