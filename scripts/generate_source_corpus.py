@@ -43,7 +43,7 @@ class Source_Data_Preparer():
             mod = re.sub(rf'(?<=[{self.vowels}])({self._get_keys("coda")})(?=[ ·])', lambda x: self.modify(x.group(1), 'coda'), token)
             if mod != '':
                 token = mod
-            mod = re.sub(rf'(?<=[ ·{self.consonants}])({self._get_keys("nucleus")})(?=[ ·{self.consonants}])', lambda x: self.modify(x.group(1), 'nucleus'), token)
+            mod = re.sub(rf'(?<=[ ·{self.consonants}])({self._get_keys("nucleus")})', lambda x: self.modify(x.group(1), 'nucleus'), token)
             if mod != '':
                 token = mod
             mod = re.sub(rf'(?<=[ ·])([{self.consonants}]?)({self._get_keys("syllable")})(?=[ ·])', lambda x: x.group(1) + self.modify(x.group(2), 'syllable'), token)
@@ -52,7 +52,7 @@ class Source_Data_Preparer():
             mod = re.sub(rf'(?<=[{self.consonants}{self.vowels}·])({self._get_keys("final")})(?= )', lambda x: self.modify(x.group(1), 'final'), token)
             if mod != '':
                 token = mod
-            mod = re.sub(rf'(?<=[{self.vowels}])({self._get_keys("ambisyllabic")})(?=[{self.vowels}])', lambda x: self.modify(x.group(1), 'ambisyllabic'), token)
+            mod = re.sub(rf'(?<=[{self.vowels}])({self._get_keys("ambisyllabic")})(?=[{self.vowels} ])', lambda x: self.modify(x.group(1), 'ambisyllabic'), token)
             if mod != '':
                 token = mod
             token = re.sub(r'·', '', token)
