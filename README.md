@@ -12,7 +12,7 @@ This repository contains all files needed to:
 Please install the requirements with the following command:
 ```
 pip install -r requirements.txt
-``
+```
 
 After installation, please start Python and run the following
 two commands to download the NLTK tokenizer:
