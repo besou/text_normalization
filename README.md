@@ -10,7 +10,9 @@ This repository contains all files needed to:
 
 ## Setup
 Please install the requirements with the following command:
-`pip install -r requirements.txt`
+```
+pip install -r requirements.txt
+``
 
 After installation, please start Python and run the following
 two commands to download the NLTK tokenizer:
@@ -24,9 +26,9 @@ The trained models for Early New High German can be used
 with the script `normalize.py`.
 
 The script takes three arguments:
-`--source` (or `-s`): a text file with Early New High German sentences
-`--outfile` (or `-o`): the file to which the normalized sentences are written
-`--config` (or `-c`): a JSON file locating the main model and the fallback model
+- `--source` (or `-s`): a text file with Early New High German sentences
+- `--outfile` (or `-o`): the file to which the normalized sentences are written
+- `--config` (or `-c`): a JSON file locating the main model and the fallback model
 
 
 ## Training
@@ -42,4 +44,6 @@ An example of a valid JSON file with permutations for Early New High German
 can be found in `data/config.jaon`.
 
 _Example training:_
-`bash train_model.sh -s fnhd -t nhd data/corpus.txt data/config.json`
+```
+bash train_model.sh -s fnhd -t nhd data/corpus.txt data/config.json
+```
