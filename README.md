@@ -30,6 +30,11 @@ The script takes three arguments:
 - `--outfile` (or `-o`): the file to which the normalized sentences are written
 - `--config` (or `-c`): a JSON file locating the main model and the fallback model
 
+_Example usage:_
+```
+python normalize.py -s data/test.txt -o test.hyps config_normalizer.json
+```
+
 
 ## Training
 In order to train a new model, you need:
