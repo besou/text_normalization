@@ -32,7 +32,7 @@ The script takes three arguments:
 
 _Example usage:_
 ```
-python normalize.py -s data/test.txt -o test.hyps config_normalizer.json
+python normalize.py -s data/test.fnhd -o test.hyps -c config_normalizer.json
 ```
 
 
@@ -50,5 +50,5 @@ can be found in `data/config.jaon`.
 
 _Example training:_
 ```
-bash train_model.sh -s fnhd -t nhd data/corpus.txt data/config.json
+bash train_model.sh -s fnhd -t nhd data/sample_corpus.txt data/config.json
 ```

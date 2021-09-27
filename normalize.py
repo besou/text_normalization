@@ -1,6 +1,6 @@
+import argparse
 import json
 import re
-import sys
 
 from fairseq.models.transformer import TransformerModel
 from nltk.tokenize import word_tokenize
@@ -80,15 +80,28 @@ class Normalizer():
         model_output = self.postprocess(model_output, ignore_tokens)
         return model_output
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Normalize text.')
+    parser.add_argument('--source', '-s', type=str, required=True,
+                        help='Source file with sequences to normalize.')
+    parser.add_argument('--outfile', '-o', type=str, required=True,
+                        help='File to which the normalized sequences are written.')
+    parser.add_argument('--config', '-c', type=str, required=True,
+                        help='JSON file indicating the parameters for the main model'\
+                        'and the fallback model.')
+    return parser.parse_args()
+
 def main():
-    with open(sys.argv[3]) as f:
+    args = parse_args()
+
+    with open(args.config) as f:
         config = json.load(f)
 
     normalizer = Normalizer(config)
 
     num_sents = 0
 
-    with open(sys.argv[1]) as infile, open(sys.argv[2], 'w') as outfile:
+    with open(args.source) as infile, open(args.outfile, 'w') as outfile:
         for line in infile:
             num_sents += 1
             normalized = normalizer.normalize(line.strip())

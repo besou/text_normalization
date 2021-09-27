@@ -1,13 +1,13 @@
 {
     "main_model": {
-        "path": "data-bin/bullinger_spm",
-        "checkpoint_file": "../../checkpoints/bullinger_spm/checkpoint_best.pt",
-        "sentencepiece_model": "data-bin/bullinger_spm/subword.model"
+        "path": "models/bullinger_main",
+        "checkpoint_file": "model.pt",
+        "sentencepiece_model": "models/bullinger_main/subword.model"
     },
     "fallback_model": {
-        "path": "data-bin/bullinger_spm",
-        "checkpoint_file": "../../checkpoints/bullinger_spm/checkpoint_best.pt",
-        "sentencepiece_model": "data-bin/bullinger_spm/subword.model"    
+        "path": "models/bullinger_fallback",
+        "checkpoint_file": "model.pt",
+        "sentencepiece_model": "models/bullinger_fallback/subword.model"    
     },
     "charset": "A-ZÆÄÂÁÀËÊÉÈĘÏÎÍÌÖÔÓÒÜÛÚÙa-zßäâáàëêéèęïîíìöôóòüûúùuͦuͤ0-9.,;:!?-–−/()„“’"
 }
