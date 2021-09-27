@@ -41,7 +41,6 @@ class Normalizer():
         text = re.sub(r'< ([^<>]*) >', r'<\1>', text)
         text = re.sub(r'# #', r'##', text)
         text = re.sub(r'\[ ([^\[\]]*) \]', lambda x: '[' + x.group(1).replace(' ', '@@') + ']', text)
-        print(text)
 
         ignore_tokens = [(index, token)
                   for (index, token) in enumerate(text.split())
@@ -53,8 +52,7 @@ class Normalizer():
                        if not token.startswith('<') and not token.endswith('>')
                        and not token.startswith('#') and not token.endswith('#')
                        and not token.startswith('[') and not token.endswith(']')])
-        print(ignore_tokens)
-        print(model_input)
+
         return model_input, ignore_tokens
 
     def postprocess(self, model_output, ignore_tokens):
@@ -70,13 +68,10 @@ class Normalizer():
 
     def normalize(self, text):
         model_input, ignore_tokens = self.preprocess(text)
-        print('IN: ', model_input)
         model_output = self.main_model.translate(model_input)
-        print('OUT: ', model_output)
         if len(model_output.split()) != len(model_input.split()):
             print(f'Fallback model is used for:\n{text}')
-            model_output = "FAIL."
-            #model_output = self.fallback_model.translate(model_input)
+            model_output = "FAIL." # self.fallback_model.translate(model_input)
         model_output = self.postprocess(model_output, ignore_tokens)
         return model_output
 
@@ -110,9 +105,6 @@ def main():
                 print(f'Processed {num_sents} sentences.\r', end='')
 
     print(f'Processed {num_sents} sentences.')
-
-    #text = 'dis isch eyn test <sup>6</sup>, wellcher zeygen söll, öb di [unabdingbaren] transforma[tionen] funktionieren.'
-    #print(normalizer.normalize(text))
 
 if __name__ == '__main__':
     main()
