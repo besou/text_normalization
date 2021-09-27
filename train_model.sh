@@ -1,8 +1,8 @@
 #!/bin/bash
 
-usage="USAGE: bash train_normalizer.sh [-h] [-o output_dir] [-s source_suffix] [-t target_suffix] [-f] INPUT_FILE CONFIG_FILE"
+usage="USAGE: bash train_normalizer.sh [-h] [-o output_dir] [-s source_suffix] [-t target_suffix] [-w] [-f] INPUT_FILE CONFIG_FILE"
 
-while getopts ":ho:s:t:f" opt; do
+while getopts ":ho:s:t:wf" opt; do
     case $opt in
         h ) echo $usage
             ;;
@@ -11,6 +11,8 @@ while getopts ":ho:s:t:f" opt; do
         s ) src=$OPTARG
             ;;
         t ) tgt=$OPTARG
+            ;;
+        w ) word_with_context=true
             ;;
         f ) force_overwrite=true
             ;;
@@ -28,6 +30,7 @@ outdir=${outdir:-textnorm}
 src=${src:-fnhd}
 tgt=${tgt:-nhd}
 force_overwrite=${force_overwrite:-false}
+word_with_context=${word_with_context:-false}
 
 if [[ -e ${outdir} ]] && [[ ${force_overwrite} = false ]]; then
     echo "The directory ${outdir} already exists. Choose another directory name with the option -o, or use the option -f to force overwriting."
@@ -47,6 +50,12 @@ echo "Prepare parallel corpus ..."
 python3 scripts/clean_target_corpus.py ${input} ${outdir}/corpus.${tgt} ${config}
 python3 scripts/generate_source_corpus.py ${outdir}/corpus.${tgt} ${outdir}/corpus.${src} ${config}
 
+if [[ ${word_with_context} = true ]]; then
+    mv ${outdir}/corpus.${src} ${outdir}/corpus.orig.${src}
+    mv ${outdir}/corpus.${tgt} ${outdir}/corpus.orig.${tgt}
+    python3 scripts/prepare_word_with_context_data.py ${outdir}/corpus.orig.${src} ${outdir}/corpus.orig.${tgt} ${outdir}/corpus.${src} ${outdir}/corpus.${tgt} 
+fi
+
 # split data into train/valid/test sets
 echo "Split training data into train/valid/test sets ..."
 python3 scripts/split_training_data.py ${outdir}/corpus.${src} ${outdir}/corpus.${tgt} ${outdir} ${src} ${tgt}
@@ -54,7 +63,7 @@ echo "Done."
 
 # apply encoding
 cat ${outdir}/train.${src} ${outdir}/train.${tgt} | shuf > ${outdir}/train.full
-python3 scripts/subword_encode.py ${src} ${tgt} ${outdir} train.full
+python3 scripts/subword_encode.py ${src} ${tgt} ${outdir} train.full ${word_with_context}
 
 # binarize training data
 fairseq-preprocess --joined-dictionary \
@@ -67,6 +76,9 @@ fairseq-preprocess --joined-dictionary \
                    --thresholdtgt 0 \
                    --thresholdsrc 0 \
                    --workers 25
+
+mv subword.model data-bin/${outdir}
+mv subword.vocab data-bin/${outdir}
 
 # train model
 fairseq-train data-bin/${outdir} \
