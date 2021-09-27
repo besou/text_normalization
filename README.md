@@ -46,7 +46,7 @@ using the arguments `-s` and `-t`.
 The default suffixes are `-s fnhd` and `-t nhd`.
 
 An example of a valid JSON file with permutations for Early New High German
-can be found in `data/config.jaon`.
+can be found in `data/config.json`.
 
 _Example training:_
 ```
