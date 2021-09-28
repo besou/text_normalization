@@ -8,6 +8,8 @@ This repository contains all files needed to:
 - use trained models for Early New High German
 - train new models for new languages
 
+More details about the approach can be found in the paper `paper.pdf`.
+
 ## Setup
 Please install the requirements with the following command:
 ```
@@ -39,14 +41,14 @@ python normalize.py -s data/test.fnhd -o test.hyps -c config_normalizer.json
 ## Training
 In order to train a new model, you need:
 - a target side corpus in standard language
-- a JSON file with a list of possible target-to-source permutations
+- a JSON file with a list of possible spelling correspondences between the source and target languages
 
 In addition, the source side and target side suffixes may be indicated
 using the arguments `-s` and `-t`.
 The default suffixes are `-s fnhd` and `-t nhd`.
 
-An example of a valid JSON file with permutations for Early New High German
-can be found in `data/config.json`.
+An example of a valid JSON file with spelling correspondences for
+Early New High German can be found in `data/config.json`.
 
 _Example training:_
 ```
