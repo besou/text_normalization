@@ -9,12 +9,17 @@ source = sys.argv[1]
 target = sys.argv[2]
 outdir = sys.argv[3]
 training_file = sys.argv[4]
-word_with_context = True
+word_with_context = sys.argv[5]
 
 if word_with_context:
-    spm.SentencePieceTrainer.train(input=f'{outdir}/{training_file}', model_prefix='subword', vocab_size=1000, user_defined_symbols=['<token>', '</token>', '<pad>'])
+    spm.SentencePieceTrainer.train(input=f'{outdir}/{training_file}',
+                                   model_prefix='subword',
+                                   vocab_size=1000,
+                                   user_defined_symbols=['<token>', '</token>', '<pad>'])
 else:
-    spm.SentencePieceTrainer.train(input=f'{outdir}/{training_file}', model_prefix='subword', vocab_size=1000)
+    spm.SentencePieceTrainer.train(input=f'{outdir}/{training_file}',
+                                   model_prefix='subword',
+                                   vocab_size=1000)
 
 sp = spm.SentencePieceProcessor(model_file='subword.model')
 
@@ -23,6 +28,7 @@ langs = [source, target]
 
 for partition in partitions:
     for lang in langs:
-        with open(f'{outdir}/{partition}.{lang}') as infile, open(f'{outdir}/{partition}.sub.{lang}', 'w') as outfile:
+        with open(f'{outdir}/{partition}.{lang}') as infile, \
+            open(f'{outdir}/{partition}.sub.{lang}', 'w') as outfile:
             for line in infile:
                 outfile.write(' '.join(sp.encode(line, out_type=str))+'\n')

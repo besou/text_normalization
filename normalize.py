@@ -162,7 +162,8 @@ class Normalizer():
             text = model_input.strip().lower().split()
             text = ['<pad>']*5 + [word.strip() for word in text] + ['<pad>']*5
             for i in range(len(text)-10):
-                current = ' '.join(text[i:i+5]) + f' <token> {text[i+5]} </token> ' + ' '.join(text[i+6:i+11])
+                current = ' '.join(text[i:i+5]) + f' <token> {text[i+5]} </token> ' \
+                    + ' '.join(text[i+6:i+11])
                 print(current)
                 prediction = self.fallback_model.translate(current)
                 print(prediction)

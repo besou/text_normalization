@@ -17,7 +17,7 @@ import pyphen
 from unidecode import unidecode
 
 
-class Target_Data_Cleaner():
+class TargetDataCleaner():
     """
     Class to clean target-side data.
 
@@ -97,10 +97,9 @@ class Target_Data_Cleaner():
 
 
     def _find_nth(self, string, substring, n):
-        if (n == 1):
+        if n == 1:
             return string.find(substring)
-        else:
-            return string.find(substring, self._find_nth(string, substring, n-1) + 1)
+        return string.find(substring, self._find_nth(string, substring, n-1) + 1)
 
 
     def prepare_n_to_m_mapping(self, text):
@@ -131,7 +130,7 @@ class Target_Data_Cleaner():
         return text
 
 
-    def preprocess(self, text, n_to_m=True):
+    def preprocess(self, text):
         """
         Preprocess a string:
         - normalize punctuation
@@ -151,7 +150,7 @@ class Target_Data_Cleaner():
         text = self.word_tokenize(text)
         text = re.sub(r' +', ' ', text)
         texts = []
-        for i in range(self.n_copies):
+        for _ in range(self.n_copies):
             if self.n_to_m:
                 texts.append(self.prepare_n_to_m_mapping(text))
             else:
@@ -196,10 +195,10 @@ def main():
     and preprocess the target corpus.
     """
 
-    with open(sys.argv[3]) as f:
-        config = json.load(f)
+    with open(sys.argv[3]) as configfile:
+        config = json.load(configfile)
 
-    data_cleaner = Target_Data_Cleaner(config)
+    data_cleaner = TargetDataCleaner(config)
 
     num_sents = 0
     num_del = 0

@@ -9,10 +9,9 @@ import sys
 
 import json
 import pyphen
-from unidecode import unidecode
 
 
-class Source_Data_Preparer():
+class SourceDataPreparer():
     """
     Class to generate source-side strings given target-side strings
 
@@ -117,7 +116,8 @@ class Source_Data_Preparer():
                          lambda x: self.modify(x.group(1), 'final'), token)
             if mod != '':
                 token = mod
-            mod = re.sub(rf'(?<=[{self.vowels}])({self._get_keys("ambisyllabic")})(?=[{self.vowels} ])',
+            mod = re.sub(rf'(?<=[{self.vowels}])'\
+                         '({self._get_keys("ambisyllabic")})(?=[{self.vowels} ])',
                          lambda x: self.modify(x.group(1), 'ambisyllabic'), token)
             if mod != '':
                 token = mod
@@ -139,13 +139,13 @@ def main():
     and generate a source-side corpus by applying random substring substitutions.
     """
 
-    with open(sys.argv[3]) as f:
-        config = json.load(f)
+    with open(sys.argv[3]) as configfile:
+        config = json.load(configfile)
 
     dic = pyphen.Pyphen(lang=f'{config["lang"]}_{config["lang"].upper()}',
                         left=1, right=1)
 
-    data_preparer = Source_Data_Preparer(config)
+    data_preparer = SourceDataPreparer(config)
 
     num_sents = 0
 
