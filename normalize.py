@@ -39,10 +39,10 @@ class Normalizer():
             bpe='sentencepiece',
             sentencepiece_model=config['main_model']['sentencepiece_model'])
         self.fallback_model = TransformerModel.from_pretrained(
-            config['main_model']['path'],
-            checkpoint_file=config['main_model']['checkpoint_file'],
+            config['fallback_model']['path'],
+            checkpoint_file=config['fallback_model']['checkpoint_file'],
             bpe='sentencepiece',
-            sentencepiece_model=config['main_model']['sentencepiece_model'])
+            sentencepiece_model=config['fallback_model']['sentencepiece_model'])
         self.charset = config['charset']
 
     def remove_invalid_characters(self, text):
@@ -151,10 +151,24 @@ class Normalizer():
         """
 
         model_input, ignore_tokens = self.preprocess(text)
+
+        # use main model
         model_output = self.main_model.translate(model_input)
+
+        # use fallback model if main model failed
         if len(model_output.split()) != len(model_input.split()):
             print(f'Fallback model is used for:\n{text}')
-            model_output = "FAIL." # self.fallback_model.translate(model_input)
+            model_output = []
+            text = model_input.strip().lower().split()
+            text = ['<pad>']*5 + [word.strip() for word in text] + ['<pad>']*5
+            for i in range(len(text)-10):
+                current = ' '.join(text[i:i+5]) + f' <token> {text[i+5]} </token> ' + ' '.join(text[i+6:i+11])
+                print(current)
+                prediction = self.fallback_model.translate(current)
+                print(prediction)
+                model_output.append(prediction)
+            model_output = ' '.join(model_output)
+
         model_output = self.postprocess(model_output, ignore_tokens)
         return model_output
 
