@@ -1,3 +1,7 @@
+"""
+Split the full corpus into a training set, a validation set and a test set.
+"""
+
 import sys
 import random
 

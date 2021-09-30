@@ -1,6 +1,13 @@
+"""
+Prepare the training corpus for a word-with-context model.
+Create a sample for each token, with a 10-token context window
+on the source side.
+"""
+
 import sys
 
-with open(sys.argv[1]) as srcfile, open(sys.argv[2]) as tgtfile, open(sys.argv[3], 'w') as src_out, open(sys.argv[4], 'w') as tgt_out:
+with open(sys.argv[1]) as srcfile, open(sys.argv[2]) as tgtfile,\
+     open(sys.argv[3], 'w') as src_out, open(sys.argv[4], 'w') as tgt_out:
     for line1, line2 in zip(srcfile, tgtfile):
         line1 = ['<pad>']*5 + line1.split() + ['<pad>']*5
         line2 = ['<pad>']*5 + line2.split() + ['<pad>']*5

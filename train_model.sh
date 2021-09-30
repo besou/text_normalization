@@ -32,11 +32,13 @@ tgt=${tgt:-nhd}
 force_overwrite=${force_overwrite:-false}
 word_with_context=${word_with_context:-false}
 
+# Raise error if outdir exists.
 if [[ -e ${outdir} ]] && [[ ${force_overwrite} = false ]]; then
     echo "The directory ${outdir} already exists. Choose another directory name with the option -o, or use the option -f to force overwriting."
     exit 1;
 fi
 
+# Overwrite existing outdir if force_overwrite is activated.
 if [[ -e ${outdir} ]] && [[ ${force_overwrite} = true ]]; then
     rm -r ${outdir}
     rm -r data-bin/${outdir}
@@ -50,6 +52,7 @@ echo "Prepare parallel corpus ..."
 python3 scripts/clean_target_corpus.py ${input} ${outdir}/corpus.${tgt} ${config}
 python3 scripts/generate_source_corpus.py ${outdir}/corpus.${tgt} ${outdir}/corpus.${src} ${config}
 
+# generate training data for the word-with-context model if option is activated
 if [[ ${word_with_context} = true ]]; then
     mv ${outdir}/corpus.${src} ${outdir}/corpus.orig.${src}
     mv ${outdir}/corpus.${tgt} ${outdir}/corpus.orig.${tgt}
@@ -61,7 +64,7 @@ echo "Split training data into train/valid/test sets ..."
 python3 scripts/split_training_data.py ${outdir}/corpus.${src} ${outdir}/corpus.${tgt} ${outdir} ${src} ${tgt}
 echo "Done."
 
-# apply encoding
+# train sencencepiece model and apply encoding
 cat ${outdir}/train.${src} ${outdir}/train.${tgt} | shuf > ${outdir}/train.full
 python3 scripts/subword_encode.py ${src} ${tgt} ${outdir} train.full ${word_with_context}
 

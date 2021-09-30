@@ -1,3 +1,8 @@
+"""
+Generate the source-side corpus based on a target-side corpus
+by applying random substring substitutions.
+"""
+
 import random
 import re
 import sys
@@ -8,6 +13,19 @@ from unidecode import unidecode
 
 
 class Source_Data_Preparer():
+    """
+    Class to generate source-side strings given target-side strings
+
+    Args:
+        config (str): path to a JSON configuration file.
+
+    Attributes:
+        replacements (dict): dictionary with target-to-source replacements.
+        n_to_m (bool): option to activate n-to-m mapping.
+        vowels (str): a list of vowels.
+        consonants (str): a list of consonants.
+    """
+
     def __init__(self, config):
         self.replacements = config['replacements']
         self.n_to_m = config['n_to_m']
@@ -16,20 +34,62 @@ class Source_Data_Preparer():
 
 
     def _select(self, lst):
+        """
+        Randomly select an item from a list.
+
+        Args:
+            lst (list): a list with options.
+
+        Returns:
+            str: the selected item from the list.
+        """
+
         return lst[random.randint(0, len(lst)-1)]
 
 
     def _get_keys(self, position):
+        """
+        Get the keys per grapheme class in the configuration file (helper function).
+
+        Args:
+            position (str): the position in the syllable, e.g. onset or coda.
+
+        Returns:
+            str: a '|'-separated string with all keys.
+        """
+
         return '|'.join(sorted(self.replacements[position].keys(), reverse=True))
 
 
     def modify(self, grapheme, grapheme_type):
+        """
+        Apply random substitutions to a grapheme sequence of a specific grapheme type.
+
+        Args:
+            grapheme (str): a grapheme sequence reflecting the onset, nucleus, coda etc.
+                of a syllable.
+            grapheme_type (str): the class of the grapheme sequence.
+
+        Returns:
+            A randomly modified version of the input string.
+        """
+
         if random.random() > 0.84 and self.replacements[grapheme_type][grapheme] != []:
             grapheme = self._select(self.replacements[grapheme_type][grapheme])
         return grapheme
 
 
     def process(self, text):
+        """
+        Apply random substitutions to a string.
+
+        Args:
+            text (str): the target-side string.
+
+        Returns:
+            str: the source-side string.
+        """
+
         if self.n_to_m:
             text = text.replace('_', '')
             text = re.sub(rf'(?=[{self.consonants}{self.vowels}])- ', ' ', text)
@@ -37,22 +97,28 @@ class Source_Data_Preparer():
         source = []
         for token_orig in tokens:
             token = f' {token_orig} '
-            mod = re.sub(rf'(?<=[ ·])({self._get_keys("onset")})(?=[{self.vowels}])', lambda x: self.modify(x.group(1), 'onset'), token)
+            mod = re.sub(rf'(?<=[ ·])({self._get_keys("onset")})(?=[{self.vowels}])',
+                         lambda x: self.modify(x.group(1), 'onset'), token)
             if mod != '':
                 token = mod
-            mod = re.sub(rf'(?<=[{self.vowels}])({self._get_keys("coda")})(?=[ ·])', lambda x: self.modify(x.group(1), 'coda'), token)
+            mod = re.sub(rf'(?<=[{self.vowels}])({self._get_keys("coda")})(?=[ ·])',
+                         lambda x: self.modify(x.group(1), 'coda'), token)
             if mod != '':
                 token = mod
-            mod = re.sub(rf'(?<=[ ·{self.consonants}])({self._get_keys("nucleus")})', lambda x: self.modify(x.group(1), 'nucleus'), token)
+            mod = re.sub(rf'(?<=[ ·{self.consonants}])({self._get_keys("nucleus")})',
+                         lambda x: self.modify(x.group(1), 'nucleus'), token)
             if mod != '':
                 token = mod
-            mod = re.sub(rf'(?<=[ ·])([{self.consonants}]?)({self._get_keys("syllable")})(?=[ ·])', lambda x: x.group(1) + self.modify(x.group(2), 'syllable'), token)
+            mod = re.sub(rf'(?<=[ ·])([{self.consonants}]?)({self._get_keys("syllable")})(?=[ ·])',
+                         lambda x: x.group(1) + self.modify(x.group(2), 'syllable'), token)
             if mod != '':
                 token = mod
-            mod = re.sub(rf'(?<=[{self.consonants}{self.vowels}·])({self._get_keys("final")})(?= )', lambda x: self.modify(x.group(1), 'final'), token)
+            mod = re.sub(rf'(?<=[{self.consonants}{self.vowels}·])({self._get_keys("final")})(?= )',
+                         lambda x: self.modify(x.group(1), 'final'), token)
             if mod != '':
                 token = mod
-            mod = re.sub(rf'(?<=[{self.vowels}])({self._get_keys("ambisyllabic")})(?=[{self.vowels} ])', lambda x: self.modify(x.group(1), 'ambisyllabic'), token)
+            mod = re.sub(rf'(?<=[{self.vowels}])({self._get_keys("ambisyllabic")})(?=[{self.vowels} ])',
+                         lambda x: self.modify(x.group(1), 'ambisyllabic'), token)
             if mod != '':
                 token = mod
             token = re.sub(r'·', '', token)
@@ -68,10 +134,16 @@ class Source_Data_Preparer():
 
 
 def main():
+    """
+    Read the configuration file, initialize a source-data generator
+    and generate a source-side corpus by applying random substring substitutions.
+    """
+
     with open(sys.argv[3]) as f:
         config = json.load(f)
 
-    dic = pyphen.Pyphen(lang=f'{config["lang"]}_{config["lang"].upper()}', left=1, right=1)
+    dic = pyphen.Pyphen(lang=f'{config["lang"]}_{config["lang"].upper()}',
+                        left=1, right=1)
 
     data_preparer = Source_Data_Preparer(config)
 

@@ -1,8 +1,8 @@
 """
-- take single input file with one sentence per line
+Clean the target-side corpus:
 - remove bad samples from training data
 - restrict character range
-- tokenize to words
+- tokenize
 - optional: prepare n-to-m mapping
 """
 
@@ -18,6 +18,22 @@ from unidecode import unidecode
 
 
 class Target_Data_Cleaner():
+    """
+    Class to clean target-side data.
+
+    Args:
+        config (str): path to a JSON configuration file.
+
+    Attributes:
+        charset (str): set of valid characters in the input.
+        lang (str): two-letter language code.
+        n_to_m (bool): option to allow n-to-m mapping between source and target.
+        n_copies (int): number of times each sample is copied
+            in order to enlarge the corpus.
+        identifier: model to identify the language of a string.
+        dic: Pyphen class to syllable-tokenize a string.
+    """
+
     def __init__(self, config):
         self.charset = config['charset_target']
         self.lang = config['lang']
@@ -29,6 +45,16 @@ class Target_Data_Cleaner():
 
 
     def remove_chars(self, text):
+        """
+        Normalize punctuation.
+
+        Args:
+            text (str): a string.
+
+        Returns:
+            str: the string with normalized punctuation.
+        """
+
         text = text.replace(r'[_\+\*$#=~\[\]\{\}]', '')
         text = re.sub(r'(- ?)+', '-', text)
         text = re.sub('—', '-', text)
@@ -38,6 +64,17 @@ class Target_Data_Cleaner():
 
 
     def restrict_charset(self, text):
+        """
+        Replace all non-ASCII characters that are not in self.charset
+        with their closest ASCII equivalent.
+
+        Args:
+            text (str): a string.
+
+        Returns:
+            str: the string with normalized character range.
+        """
+
         exceptions = set(c for c in self.charset if len(c.encode()) > 1)
         text = ''.join([unidecode(char) if len(char.encode()) > 1
             and char not in exceptions else char for char in text])
@@ -45,6 +82,16 @@ class Target_Data_Cleaner():
 
 
     def word_tokenize(self, text):
+        """
+        Tokenize a string.
+
+        Args:
+            text (str): a string.
+
+        Returns:
+            str: the tokenized string.
+        """
+
         text = word_tokenize(text)
         return ' '.join(text)
 
@@ -57,6 +104,16 @@ class Target_Data_Cleaner():
 
 
     def prepare_n_to_m_mapping(self, text):
+        """
+        Merge and split some tokens to enable n-to-m mapping.
+
+        Args:
+            text (str): a string.
+
+        Returns:
+            str: the processed string.
+        """
+
         if random() > 0.99 and text.count(' ') > 2:
             n_spaces = text.count(' ')
             n = randint(1, n_spaces-1)
@@ -75,6 +132,20 @@ class Target_Data_Cleaner():
 
 
     def preprocess(self, text, n_to_m=True):
+        """
+        Preprocess a string:
+        - normalize punctuation
+        - restrict character set
+        - tokenize
+        - optional: prepare potential n-to-m mapping
+
+        Args:
+            text (str): a string.
+
+        Returns:
+            str: the preprocessed string.
+        """
+
         text = self.remove_chars(text)
         text = self.restrict_charset(text)
         text = self.word_tokenize(text)
@@ -89,6 +160,16 @@ class Target_Data_Cleaner():
 
 
     def is_trash(self, text):
+        """
+        Check if a string is trash based on heuristics:
+
+        Args:
+            text (str): a string.
+
+        Returns:
+            bool: True if the string is trash, False otherwise.
+        """
+
         if len(text) < 5:
             return True
         if sum(char.isupper() for char in text) > len(text)/5:
@@ -110,6 +191,11 @@ class Target_Data_Cleaner():
 
 
 def main():
+    """
+    Read the configuration file, initialize a target data cleaner object
+    and preprocess the target corpus.
+    """
+
     with open(sys.argv[3]) as f:
         config = json.load(f)
 
